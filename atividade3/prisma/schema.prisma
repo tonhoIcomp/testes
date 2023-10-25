@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Categoria {
+  categoria_id Int            @id @default(autoincrement())
+  nome         String         @db.VarChar(255)
+  subCategoria SubCategoria[]
+  produto      Produto[]
+}
+
+model SubCategoria {
+  subcategoria_id Int       @id @default(autoincrement())
+  nome            String    @db.VarChar(255)
+  categoria       Categoria @relation(fields: [categoriaid], references: [categoria_id])
+  categoriaid     Int
+}
+
+model Cliente {
+  cliente_id      Int        @id @default(autoincrement())
+  nome_completo   String     @db.VarChar(255)
+  cpf             String     @unique @db.VarChar(14)
+  numero_celular  String     @unique @db.VarChar(15)
+  email           String     @unique @db.VarChar(255)
+  data_nascimento DateTime
+  compra          Compra[]
+  endereco        Endereco[]
+}
+
+model Endereco {
+  endereco_id Int      @id @default(autoincrement())
+  rua         String   @db.VarChar(255)
+  cidade      String   @db.VarChar(255)
+  estado      String   @db.VarChar(255)
+  cep         String   @db.VarChar(11)
+  cliente     Cliente  @relation(fields: [clienteid], references: [cliente_id])
+  clienteid   Int
+  compra      Compra[]
+}
+
+model Compra {
+  compra_id       Int             @id @default(autoincrement())
+  data_hora       DateTime
+  desconto        Decimal         @db.Decimal(9, 2)
+  forma_pagamento String          @db.VarChar(255)
+  total_compra    Decimal         @db.Decimal(9, 2)
+  cliente         Cliente?        @relation(fields: [clienteid], references: [cliente_id])
+  clienteid       Int
+  endereco        Endereco        @relation(fields: [enderecoid], references: [endereco_id])
+  enderecoid      Int
+  compraproduto   CompraProduto[]
+}
+
+model Modelo {
+  modelo_id   Int           @id @default(autoincrement())
+  nome        String        @db.VarChar(255)
+  numeroserie NumeroSerie[]
+  produto     Produto[]
+}
+
+model NumeroSerie {
+  numero_serie_id Int    @id @default(autoincrement())
+  numero_serie    String @db.VarChar(255)
+  modelo          Modelo @relation(fields: [modelo_id], references: [modelo_id])
+  modelo_id       Int
+}
+
+model Produto {
+  produto_id    Int             @id @default(autoincrement())
+  preco_base    Decimal         @db.Decimal(9, 2)
+  quantidade    Int             @db.Int
+  categoria     Categoria       @relation(fields: [categoriaid], references: [categoria_id])
+  categoriaid   Int
+  modelo        Modelo          @relation(fields: [modeloid], references: [modelo_id])
+  modeloid      Int
+  CompraProduto CompraProduto[]
+
+  @@map("produto")
+}
+
+model CompraProduto {
+  compra_id Int     @id @default(autoincrement())
+  compra    Compra  @relation(fields: [compraid], references: [compra_id])
+  compraid  Int
+  produto   Produto @relation(fields: [produtoid], references: [produto_id])
+  produtoid Int
+}
