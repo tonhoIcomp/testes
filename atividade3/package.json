@@ -56,7 +56,7 @@
     "yn": "^3.1.1"
   },
   "scripts": {
-    "start": "nodemon ./src/app.ts"
+    "start": "nodemon ./src/server.ts"
   },
   "keywords": [],
   "author": "",
